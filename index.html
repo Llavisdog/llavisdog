@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LLAVIS DOG | O Sabor Que Conquista!</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+
+<div class="container">
+
+<div class="logo">
+<img src="logo.png" alt="LLAVIS DOG">
+</div>
+
+<nav class="menu">
+
+<a href="#inicio">Início</a>
+<a href="#cardapio">Cardápio</a>
+<a href="#promocoes">Promoções</a>
+<a href="#entrega">Entrega</a>
+<a href="#contato">Contato</a>
+
+</nav>
+
+<div class="menu-mobile">
+<i class="fas fa-bars"></i>
+</div>
+
+</div>
+
+</header>
+
+<!-- HERO -->
+
+<section class="hero" id="inicio">
+
+<div class="overlay"></div>
+
+<div class="hero-content">
+
+<h1>LLAVIS DOG</h1>
+
+<h2>O sabor que conquista!</h2>
+
+<p>
+Hot Dogs • Tapiocas • Milk Shakes • Caldos • Porções
+</p>
+
+<a href="#cardapio" class="btn">
+Ver Cardápio
+</a>
+
+</div>
+
+</section>
+
+<!-- PROMOÇÕES -->
+
+<section class="promocoes" id="promocoes">
+
+<div class="container">
+
+<h2>PROMOÇÕES ESPECIAIS</h2>
+
+<div class="promo-grid">
+
+<div class="promo-card">
+<h3>Dog Kids</h3>
+<span>R$ 13,90</span>
+</div>
+
+<div class="promo-card">
+<h3>Dog Tradicional</h3>
+<span>R$ 16,90</span>
+</div>
+
+<div class="promo-card">
+<h3>Dog Completo</h3>
+<span>R$ 19,90</span>
+</div>
+
+<div class="promo-card">
+<h3>Dog Supremo</h3>
+<span>R$ 28,90</span>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CARDÁPIO -->
+
+<section class="cardapio" id="cardapio">
+
+<div class="container">
+
+<h2>Nosso Cardápio</h2>
+
+<div class="produtos">
+
+<!-- Produto -->
+
+<div class="produto">
+
+<img src="img/dog-kids.jpg">
+
+<h3>Dog Kids</h3>
+
+<p>
+1 Salsicha + Purê + Milho + Maionese
+</p>
+
+<span>R$ 13,90</span>
+
+<button
+onclick="adicionarCarrinho('Dog Kids',13.90)">
+Adicionar
+</button>
+
+</div>
+
+<div class="produto">
+
+<img src="img/tradicional.jpg">
+
+<h3>Dog Tradicional</h3>
+
+<p>
+2 Salsichas + Vinagrete + Purê
+</p>
+
+<span>R$ 16,90</span>
+
+<button
+onclick="adicionarCarrinho('Dog Tradicional',16.90)">
+Adicionar
+</button>
+
+</div>
+
+<div class="produto">
+
+<img src="img/completo.jpg">
+
+<h3>Dog Completo</h3>
+
+<p>
+Milho + Ervilha + Purê + Batata Palha
+</p>
+
+<span>R$ 19,90</span>
+
+<button
+onclick="adicionarCarrinho('Dog Completo',19.90)">
+Adicionar
+</button>
+
+</div>
+
+<div class="produto">
+
+<img src="img/supremo.jpg">
+
+<h3>Dog Supremo</h3>
+
+<p>
+Bacon + Catupiry + Cheddar
+</p>
+
+<span>R$ 28,90</span>
+
+<button
+onclick="adicionarCarrinho('Dog Supremo',28.90)">
+Adicionar
+</button>
+
+</div>
+
+<div class="produto">
+
+<img src="img/doritos.jpg">
+
+<h3>Dog Doritos</h3>
+
+<p>
+Doritos + Bacon + Cheddar
+</p>
+
+<span>R$ 28,90</span>
+
+<button
+onclick="adicionarCarrinho('Dog Doritos',28.90)">
+Adicionar
+</button>
+
+</div>
+
+<div class="produto">
+
+<img src="img/junior.jpg">
+
+<h3>Combo Junior</h3>
+
+<p>
+Dog + Fritas + Refrigerante
+</p>
+
+<span>R$ 20,90</span>
+
+<button
+onclick="adicionarCarrinho('Combo Junior',20.90)">
+Adicionar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ENTREGA -->
+
+<section class="entrega" id="entrega">
+
+<div class="container">
+
+<h2>Taxa de Entrega</h2>
+
+<div class="taxas">
+
+<div class="taxa">
+Até 3km
+<strong>R$ 7,00</strong>
+</div>
+
+<div class="taxa">
+4km a 5km
+<strong>R$ 9,00</strong>
+</div>
+
+<div class="taxa">
+Acima de 5km
+<strong>Consultar</strong>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CARRINHO -->
+
+<section class="carrinho">
+
+<div class="container">
+
+<h2>Seu Pedido</h2>
+
+<div id="itensCarrinho"></div>
+
+<div class="total">
+
+Total:
+<span id="valorTotal">
+R$ 0,00
+</span>
+
+</div>
+
+<div class="cliente">
+
+<input
+type="text"
+id="nome"
+placeholder="Seu Nome">
+
+<input
+type="tel"
+id="telefone"
+placeholder="Telefone">
+
+<input
+type="text"
+id="endereco"
+placeholder="Endereço">
+
+<select id="entregaTipo">
+
+<option value="retirada">
+Retirada
+</option>
+
+<option value="7">
+Entrega até 3km
+</option>
+
+<option value="9">
+Entrega 4km a 5km
+</option>
+
+</select>
+
+</div>
+
+<button
+class="btn-whatsapp"
+onclick="enviarWhatsApp()">
+
+<i class="fab fa-whatsapp"></i>
+
+Finalizar Pedido
+
+</button>
+
+</div>
+
+</section>
+
+<!-- CONTATO -->
+
+<section class="contato" id="contato">
+
+<div class="container">
+
+<h2>Contato</h2>
+
+<p>
+📍 Avenida Florianópolis, 307
+</p>
+
+<p>
+📱 (11) 99794-5165
+</p>
+
+<p>
+📸 @llavisdog
+</p>
+
+</div>
+
+</section>
+
+<footer>
+
+<p>
+© 2026 LLAVIS DOG - O sabor que conquista!
+</p>
+
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+scroll-behavior:smooth;
+}
+
+:root{
+--preto:#0D0D0D;
+--vermelho:#E63946;
+--amarelo:#FFC300;
+--branco:#FFFFFF;
+--cinza:#1A1A1A;
+}
+
+body{
+background:var(--preto);
+color:var(--branco);
+overflow-x:hidden;
+}
+
+.container{
+width:90%;
+max-width:1200px;
+margin:auto;
+}
+
+/* HEADER */
+
+.header{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+background:rgba(0,0,0,.95);
+backdrop-filter:blur(10px);
+z-index:999;
+border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.header .container{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 0;
+}
+
+.logo img{
+height:80px;
+}
+
+.menu{
+display:flex;
+gap:30px;
+}
+
+.menu a{
+color:white;
+text-decoration:none;
+font-weight:600;
+transition:.3s;
+}
+
+.menu a:hover{
+color:var(--amarelo);
+}
+
+.menu-mobile{
+display:none;
+font-size:28px;
+cursor:pointer;
+}
+
+/* HERO */
+
+.hero{
+height:100vh;
+background:
+linear-gradient(rgba(0,0,0,.7),
+rgba(0,0,0,.8)),
+url('img/banner.jpg');
+
+background-size:cover;
+background-position:center;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+position:relative;
+}
+
+.hero-content{
+position:relative;
+z-index:2;
+}
+
+.hero h1{
+font-size:5rem;
+color:var(--amarelo);
+font-weight:800;
+}
+
+.hero h2{
+font-size:2rem;
+margin-bottom:20px;
+}
+
+.hero p{
+font-size:1.2rem;
+margin-bottom:30px;
+}
+
+.btn{
+display:inline-block;
+background:var(--vermelho);
+color:white;
+padding:15px 35px;
+border-radius:50px;
+text-decoration:none;
+font-weight:700;
+transition:.3s;
+}
+
+.btn:hover{
+transform:translateY(-5px);
+background:#ff283a;
+}
+
+/* SEÇÕES */
+
+section{
+padding:100px 0;
+}
+
+section h2{
+text-align:center;
+font-size:2.5rem;
+margin-bottom:50px;
+color:var(--amarelo);
+}
+
+/* PROMOÇÕES */
+
+.promo-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:25px;
+}
+
+.promo-card{
+background:linear-gradient(135deg,#E63946,#9b0f1f);
+padding:30px;
+border-radius:20px;
+text-align:center;
+transition:.3s;
+}
+
+.promo-card:hover{
+transform:translateY(-8px);
+}
+
+.promo-card h3{
+font-size:1.5rem;
+margin-bottom:15px;
+}
+
+.promo-card span{
+font-size:2rem;
+font-weight:800;
+color:var(--amarelo);
+}
+
+/* PRODUTOS */
+
+.produtos{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(280px,1fr));
+gap:30px;
+}
+
+.produto{
+background:var(--cinza);
+border-radius:20px;
+overflow:hidden;
+transition:.3s;
+border:1px solid rgba(255,255,255,.05);
+}
+
+.produto:hover{
+transform:translateY(-8px);
+}
+
+.produto img{
+width:100%;
+height:250px;
+object-fit:cover;
+}
+
+.produto h3{
+padding:15px;
+font-size:1.4rem;
+}
+
+.produto p{
+padding:0 15px;
+color:#ccc;
+min-height:70px;
+}
+
+.produto span{
+display:block;
+padding:15px;
+font-size:1.5rem;
+font-weight:800;
+color:var(--amarelo);
+}
+
+.produto button{
+width:90%;
+margin:15px;
+padding:15px;
+border:none;
+border-radius:10px;
+background:var(--vermelho);
+color:white;
+font-size:1rem;
+font-weight:700;
+cursor:pointer;
+transition:.3s;
+}
+
+.produto button:hover{
+background:#ff2538;
+}
+
+/* ENTREGA */
+
+.taxas{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+
+.taxa{
+background:var(--cinza);
+padding:30px;
+border-radius:20px;
+text-align:center;
+font-size:1.3rem;
+}
+
+.taxa strong{
+display:block;
+margin-top:10px;
+font-size:2rem;
+color:var(--amarelo);
+}
+
+/* CARRINHO */
+
+.carrinho{
+background:#111;
+}
+
+#itensCarrinho{
+background:#1a1a1a;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+min-height:150px;
+}
+
+.item{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #333;
+}
+
+.total{
+font-size:2rem;
+font-weight:800;
+text-align:right;
+margin-bottom:30px;
+color:var(--amarelo);
+}
+
+.cliente{
+display:grid;
+gap:15px;
+margin-bottom:25px;
+}
+
+.cliente input,
+.cliente select{
+padding:15px;
+border:none;
+border-radius:10px;
+background:#222;
+color:white;
+}
+
+.btn-whatsapp{
+width:100%;
+padding:20px;
+border:none;
+border-radius:15px;
+background:#25D366;
+color:white;
+font-size:1.2rem;
+font-weight:800;
+cursor:pointer;
+transition:.3s;
+}
+
+.btn-whatsapp:hover{
+transform:scale(1.02);
+}
+
+/* CONTATO */
+
+.contato{
+text-align:center;
+}
+
+.contato p{
+margin:15px 0;
+font-size:1.2rem;
+}
+
+/* FOOTER */
+
+footer{
+background:black;
+padding:30px;
+text-align:center;
+border-top:1px solid #222;
+}
+
+/* RESPONSIVO */
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:3rem;
+}
+
+.hero h2{
+font-size:1.5rem;
+}
+
+.menu{
+display:none;
+}
+
+.menu-mobile{
+display:block;
+}
+
+.logo img{
+height:65px;
+}
+
+section{
+padding:70px 0;
+}
+
+}
+
+// ==========================
+// LLAVIS DOG - CARRINHO
+// ==========================
+
+let carrinho = JSON.parse(localStorage.getItem("llavisdog")) || [];
+
+function salvarCarrinho() {
+    localStorage.setItem("llavisdog", JSON.stringify(carrinho));
+}
+
+function adicionarCarrinho(nome, preco) {
+
+    const itemExistente = carrinho.find(
+        item => item.nome === nome
+    );
+
+    if(itemExistente){
+        itemExistente.quantidade++;
+    }else{
+        carrinho.push({
+            nome,
+            preco,
+            quantidade:1
+        });
+    }
+
+    salvarCarrinho();
+    atualizarCarrinho();
+
+    alert(`${nome} adicionado ao carrinho!`);
+}
+
+function removerItem(index){
+
+    carrinho.splice(index,1);
+
+    salvarCarrinho();
+    atualizarCarrinho();
+}
+
+function alterarQuantidade(index, valor){
+
+    carrinho[index].quantidade += valor;
+
+    if(carrinho[index].quantidade <= 0){
+        carrinho.splice(index,1);
+    }
+
+    salvarCarrinho();
+    atualizarCarrinho();
+}
+
+function atualizarCarrinho(){
+
+    const lista =
+    document.getElementById("itensCarrinho");
+
+    const total =
+    document.getElementById("valorTotal");
+
+    lista.innerHTML = "";
+
+    let totalPedido = 0;
+
+    carrinho.forEach((item,index)=>{
+
+        let subtotal =
+        item.preco * item.quantidade;
+
+        totalPedido += subtotal;
+
+        lista.innerHTML += `
+            <div class="item">
+
+                <div>
+                    <strong>${item.nome}</strong>
+                    <br>
+                    R$ ${item.preco.toFixed(2)}
+                </div>
+
+                <div>
+
+                    <button onclick="alterarQuantidade(${index},-1)">
+                    -
+                    </button>
+
+                    ${item.quantidade}
+
+                    <button onclick="alterarQuantidade(${index},1)">
+                    +
+                    </button>
+
+                    <br><br>
+
+                    <button onclick="removerItem(${index})">
+                    Remover
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    });
+
+    const tipoEntrega =
+    document.getElementById("entregaTipo");
+
+    let taxaEntrega = 0;
+
+    if(tipoEntrega){
+
+        if(tipoEntrega.value === "7"){
+            taxaEntrega = 7;
+        }
+
+        if(tipoEntrega.value === "9"){
+            taxaEntrega = 9;
+        }
+    }
+
+    totalPedido += taxaEntrega;
+
+    total.innerHTML =
+    `R$ ${totalPedido.toFixed(2)}`;
+
+}
+
+document.addEventListener("change",function(e){
+
+    if(e.target.id === "entregaTipo"){
+        atualizarCarrinho();
+    }
+
+});
+
+function enviarWhatsApp(){
+
+    const nome =
+    document.getElementById("nome").value;
+
+    const telefone =
+    document.getElementById("telefone").value;
+
+    const endereco =
+    document.getElementById("endereco").value;
+
+    const entrega =
+    document.getElementById("entregaTipo");
+
+    if(carrinho.length === 0){
+
+        alert("Seu carrinho está vazio!");
+
+        return;
+    }
+
+    if(nome === ""){
+
+        alert("Informe seu nome.");
+
+        return;
+    }
+
+    let mensagem =
+`🌭 *NOVO PEDIDO - LLAVIS DOG*
+
+👤 Cliente: ${nome}
+📞 Telefone: ${telefone}
+
+📋 PEDIDO:
+`;
+
+    let total = 0;
+
+    carrinho.forEach(item=>{
+
+        let subtotal =
+        item.preco * item.quantidade;
+
+        total += subtotal;
+
+        mensagem +=
+`• ${item.nome}
+Qtd: ${item.quantidade}
+Subtotal: R$ ${subtotal.toFixed(2)}
+
+`;
+    });
+
+    let taxa = 0;
+    let entregaTexto = "Retirada";
+
+    if(entrega.value === "7"){
+
+        taxa = 7;
+
+        entregaTexto =
+        "Entrega até 3km";
+    }
+
+    if(entrega.value === "9"){
+
+        taxa = 9;
+
+        entregaTexto =
+        "Entrega de 4km a 5km";
+    }
+
+    total += taxa;
+
+    mensagem +=
+`🚚 Tipo: ${entregaTexto}
+
+📍 Endereço:
+${endereco}
+
+💰 Taxa Entrega:
+R$ ${taxa.toFixed(2)}
+
+🧾 TOTAL:
+R$ ${total.toFixed(2)}
+
+Obrigado por escolher a LLAVIS DOG! 🌭🔥`;
+
+    const numero =
+    "5511997945165";
+
+    const url =
+`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+
+    window.open(url,"_blank");
+}
+
+window.onload = () => {
+    atualizarCarrinho();
+};
