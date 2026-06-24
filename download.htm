@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><script>var __mr='all',__md='x5mbjbb7.mule.page';document.addEventListener('DOMContentLoaded', function () {
+  var BAR_HEIGHT = 38;
+
+  // --- detect page theme ---
+  var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  // fallback: sample body/html background color
+  if (!isDark) {
+    try {
+      var sample = getComputedStyle(document.body).backgroundColor;
+      if (sample === 'rgba(0, 0, 0, 0)' || sample === 'transparent') {
+        sample = getComputedStyle(document.documentElement).backgroundColor;
+      }
+      if (sample && sample !== 'rgba(0, 0, 0, 0)' && sample !== 'transparent') {
+        var m = sample.match(/\d+/g);
+        if (m) {
+          var brightness = (parseInt(m[0]) * 299 + parseInt(m[1]) * 587 + parseInt(m[2]) * 114) / 1000;
+          isDark = brightness < 128;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // --- shared CSS (always injected into <head>) ---
+  var SHARED_CSS = '<style>' +
+    '@keyframes mulepage-svg-glow-dark{0%,100%{color:#ffffff}50%{color:#3b82f6}}' +
+    '@keyframes mulepage-svg-glow-light{0%,100%{color:#000000}50%{color:#3b82f6}}' +
+    '.mulepage-anim-dark{animation:mulepage-svg-glow-dark 2.5s ease-in-out infinite}' +
+    '.mulepage-anim-light{animation:mulepage-svg-glow-light 2.5s ease-in-out infinite}' +
+    '.mulepage-btn-dark{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:0;transition:all 0.2s ease}' +
+    '.mulepage-btn-dark:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15)}' +
+    '.mulepage-btn-light{background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);border-radius:0;transition:all 0.2s ease}' +
+    '.mulepage-btn-light:hover{background:rgba(0,0,0,0.08);border-color:rgba(0,0,0,0.15)}' +
+    '.mulepage-close-dark{color:rgba(255,255,255,0.3);transition:color 0.2s ease}' +
+    '.mulepage-close-dark:hover{color:#ffffff}' +
+    '.mulepage-close-light{color:rgba(0,0,0,0.3);transition:color 0.2s ease}' +
+    '.mulepage-close-light:hover{color:#000000}' +
+    '#mulepage-footer-link{transition:opacity 0.2s ease}' +
+    '#mulepage-footer-link:hover{opacity:0.7}' +
+    '.mulepage-float{transition:box-shadow 0.2s ease;will-change:box-shadow}' +
+    '.mulepage-float:hover{box-shadow:0 6px 20px rgba(0,0,0,0.12),0 2px 6px rgba(0,0,0,0.08)}' +
+    '.mulepage-float-close{display:inline-flex;align-items:center;justify-content:center;max-width:0;margin-left:0;overflow:hidden;opacity:0;transition:max-width 0.2s ease,margin-left 0.2s ease,opacity 0.15s ease;padding:0;border:none;background:none;cursor:pointer;font-size:16px;line-height:1;font-weight:300;height:16px;will-change:max-width,opacity}' +
+    '.mulepage-float:hover .mulepage-float-close{max-width:14px;margin-left:4px;opacity:1}' +
+    '</style>';
+
+  // always inject shared CSS into <head> so it survives banner removal
+  document.head.insertAdjacentHTML('beforeend', SHARED_CSS);
+
+  // --- SVG icon (shared, rx=0 for sharp corners) ---
+  var ICON16 = '<svg width="16" height="16" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect width="36" height="36" rx="0" fill="#FBF9F6"/><g clip-path="url(#c_top)">' +
+    '<path d="M6.387 21.732v8.895H18.762V28.5h2.32v1.16h8.121V28.5h1.16v-7.928h-1.16v-1.16h-4.64v-1.16h-1.16v-1.16h-1.16v-1.16h-1.16v-1.16h-1.16v-1.16h3.287v-1.934h3.48V9.357H16.442v3.48h-2.128V6.07h-2.32v2.127H9.674v3.48H7.547v10.055H6.387Z" fill="#000"/>' +
+    '<path d="M13.154 21.732v-4.447h1.16v-1.16h4.448v4.447h-1.16v1.16h-4.448Z" fill="#fff"/>' +
+    '<rect x="15.281" y="18.252" width="2.32" height="2.32" fill="#000"/>' +
+    '<path d="M21.082 27.34v-5.608h1.16v-1.16h5.801v1.16h1.16v5.608h-1.16V28.5h-5.801v-1.16h-1.16Z" fill="#fff"/>' +
+    '<path d="M26.883 21.732h-2.32v1.16h1.16v1.16h1.16v-2.32Z" fill="#000"/>' +
+    '<path d="M22.242 24.053v2.32h1.16v1.16h3.48v-1.16h-2.32v-1.16h-1.16v-1.16h-1.16Z" fill="#000"/>' +
+    '</g><defs><clipPath id="c_top"><rect width="24.75" height="24.75" fill="#fff" transform="translate(6 6)"/></clipPath></defs></svg>';
+
+  var ICON16_FOOT = ICON16.replace(/c_top/g, 'c_foot');
+
+  // --- SVG brand text ---
+  var BRAND_SVG_DARK = '<svg class="mulepage-anim-dark" width="58" height="16" viewBox="0 0 58 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="user-select:none;">' +
+    '<text x="0" y="13" font-family="inherit" font-weight="600" font-size="13" fill="currentColor">MuleRun</text></svg>';
+
+  var BRAND_SVG_LIGHT = '<svg id="mulepage-footer-svg-text" class="mulepage-anim-light" width="56" height="15" viewBox="0 0 58 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="user-select:none;">' +
+    '<text x="0" y="13" font-family="inherit" font-weight="600" font-size="13" fill="currentColor">MuleRun</text></svg>';
+
+  // --- banner (adapts to page theme) ---
+  var bannerBg = isDark ? '#050505' : '#ffffff';
+  var bannerBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  var bannerColor = isDark ? '#fff' : '#000';
+  var bannerSubColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+  var bannerTextColor = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.65)';
+  var bannerArrowColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  var bannerSepColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+  var bannerBtnClass = isDark ? 'mulepage-btn-dark' : 'mulepage-btn-light';
+  var bannerCloseClass = isDark ? 'mulepage-close-dark' : 'mulepage-close-light';
+  var bannerBrandSvg = isDark ? BRAND_SVG_DARK : BRAND_SVG_LIGHT.replace('mulepage-footer-svg-text', 'mulepage-bar-svg-text');
+
+  var BANNER = '<div id="mulepage-bar" style="position:fixed;top:0;left:0;width:100%;height:' + BAR_HEIGHT + 'px;' +
+    'background:' + bannerBg + ';border-bottom:1px solid ' + bannerBorder + ';color:' + bannerColor + ';' +
+    'display:flex;align-items:center;justify-content:center;gap:10px;' +
+    'font-family:Inter,-apple-system,BlinkMacSystemFont,\'Segoe UI\',\'Helvetica Neue\',sans-serif;' +
+    'font-size:13px;z-index:2147483647;letter-spacing:0.02em;">' +
+    '<span style="color:' + bannerSubColor + ';font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Built with</span>' +
+    '<span id="mulepage-bar-link" class="' + bannerBtnClass + '" style="display:inline-flex;align-items:center;gap:6px;' +
+    'padding:3px 10px 3px 6px;cursor:pointer;">' +
+    ICON16 + bannerBrandSvg + '</span>' +
+    '<span style="color:' + bannerSepColor + ';margin:0 2px;">|</span>' +
+    '<span style="color:' + bannerTextColor + ';">Create your own website in minutes</span>' +
+    '<span style="color:' + bannerArrowColor + ';margin-left:-2px;">\u2192</span>' +
+    '<button id="mulepage-bar-close" class="' + bannerCloseClass + '" style="position:absolute;right:16px;background:none;border:none;border-radius:0;' +
+    'font-size:18px;cursor:pointer;line-height:1;padding:4px;font-weight:300;">\u00d7</button>' +
+    '</div>';
+
+  // --- floating widget (bottom-right, glassmorphism) ---
+  var floatBg = isDark ? 'rgba(30,30,30,0.65)' : 'rgba(255,255,255,0.65)';
+  var floatBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+  var floatShadow = isDark
+    ? '0 4px 16px rgba(0,0,0,0.4),0 1px 4px rgba(0,0,0,0.3)'
+    : '0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.06)';
+  var floatBrandSvg = isDark ? BRAND_SVG_LIGHT.replace('mulepage-anim-light', 'mulepage-anim-dark') : BRAND_SVG_LIGHT;
+  var floatCloseColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+  var floatCloseHover = isDark ? '#ffffff' : '#000000';
+  var byColor = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
+
+  var FOOTER = '<div id="mulepage-footer" class="mulepage-float" style="position:fixed !important;bottom:16px !important;right:16px !important;z-index:2147483646;' +
+    'display:inline-flex;align-items:center;padding:6px 12px 6px 6px;cursor:pointer;' +
+    'background:' + floatBg + ';border:1px solid ' + floatBorder + ';border-radius:4px;' +
+    'backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);' +
+    'box-shadow:' + floatShadow + ';' +
+    'font-family:Inter,-apple-system,BlinkMacSystemFont,\'Segoe UI\',\'Helvetica Neue\',sans-serif;">' +
+    '<span id="mulepage-footer-link" style="display:inline-flex;align-items:center;">' +
+    ICON16_FOOT +
+    '<span style="font-size:11px;font-weight:400;margin:0 4px 0 6px;color:' + byColor + ';">by</span>' +
+    floatBrandSvg +
+    '</span>' +
+    '</div>';
+
+  // --- insert banner (only when mode is "all") ---
+  if (__mr === 'all') {
+    document.body.insertAdjacentHTML('afterbegin', BANNER);
+
+    // brand link click
+    document.getElementById('mulepage-bar-link').addEventListener('click', function () {
+      window.open('https://mulerun.com?utm_source=pages&utm_medium=banner&utm_campaign=pages_branding&utm_content=top_bar', '_blank', 'noopener');
+    });
+
+    // replace favicon
+    var oldIcons = document.querySelectorAll('link[rel="icon"],link[rel="shortcut icon"]');
+    for (var k = 0; k < oldIcons.length; k++) oldIcons[k].remove();
+    var fi = document.createElement('link');
+    fi.rel = 'icon'; fi.type = 'image/svg+xml'; fi.href = 'https://mule.page/favicon.svg';
+    document.head.appendChild(fi);
+
+    // push down normal-flow content (accumulate on existing padding-top)
+    var origPT = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    document.body.style.paddingTop = (origPT + BAR_HEIGHT) + 'px';
+
+    // push down all existing position:fixed elements
+    var all = document.querySelectorAll('*');
+    var shifted = [];
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (el.id && el.id.indexOf('mulepage') === 0) continue;
+      var cs = getComputedStyle(el);
+      if (cs.position === 'fixed') {
+        var t = parseFloat(cs.top);
+        if (isNaN(t)) t = 0;
+        el.style.top = (t + BAR_HEIGHT) + 'px';
+        shifted.push({ el: el, orig: t });
+      }
+    }
+
+    // close handler: restore everything
+    document.getElementById('mulepage-bar-close').addEventListener('click', function () {
+      document.getElementById('mulepage-bar').remove();
+      document.body.style.paddingTop = origPT + 'px';
+      for (var j = 0; j < shifted.length; j++) {
+        shifted[j].el.style.top = shifted[j].orig + 'px';
+      }
+    });
+  }
+
+  // --- insert floating widget (only when __mr is set) ---
+  if (__mr) {
+    document.body.insertAdjacentHTML('beforeend', FOOTER);
+
+    // footer link click → open mulerun.com
+    var footerLink = document.getElementById('mulepage-footer-link');
+    if (footerLink) {
+      footerLink.addEventListener('click', function () {
+        window.open('https://mulerun.com/chat?utm_source=pages&utm_medium=banner&utm_campaign=pages_branding&utm_content=bottom_bar', '_blank', 'noopener');
+      });
+    }
+
+    // paid users (footer-only mode): add close button on hover
+    if (__mr === 'footer') {
+      var floatEl = document.getElementById('mulepage-footer');
+      if (floatEl) {
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'mulepage-float-close';
+        closeBtn.style.color = floatCloseColor;
+        closeBtn.textContent = '\u00d7';
+        closeBtn.addEventListener('mouseenter', function () { closeBtn.style.color = floatCloseHover; });
+        closeBtn.addEventListener('mouseleave', function () { closeBtn.style.color = floatCloseColor; });
+        closeBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          floatEl.remove();
+        });
+        floatEl.appendChild(closeBtn);
+      }
+    }
+  }
+
+  // --- inject canonical link (all users) ---
+  var canon = document.createElement('link');
+  canon.rel = 'canonical';
+  canon.href = 'https://' + location.hostname + '/';
+  document.head.appendChild(canon);
+
+  // --- inject og meta tags (all users) ---
+  var ogDomain = __md;
+  var ogTitle = document.title || ogDomain;
+  var ogTags = [
+    ['og:title', ogTitle],
+    ['og:url', 'https://' + location.hostname + '/'],
+    ['og:type', 'website'],
+    ['og:image', 'https://mule.page/og/' + ogDomain + '.webp']
+  ];
+  for (var n = 0; n < ogTags.length; n++) {
+    var existing = document.querySelector('meta[property="' + ogTags[n][0] + '"]');
+    if (existing) existing.remove();
+    var meta = document.createElement('meta');
+    meta.setAttribute('property', ogTags[n][0]);
+    meta.setAttribute('content', ogTags[n][1]);
+    document.head.appendChild(meta);
+  }
+});
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llavis Dog | O Sabor que Conquista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Righteous&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-red': '#E60000',
+                        'brand-gold': '#FFD700',
+                        'brand-brown': '#3E2723',
+                        'brand-cream': '#FFF8E1',
+                    },
+                    fontFamily: {
+                        'display': ['Righteous', 'cursive'],
+                        'body': ['Outfit', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFF8E1;
+            background-image: radial-gradient(#E60000 0.5px, transparent 0.5px), radial-gradient(#E60000 0.5px, #FFF8E1 0.5px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            background-attachment: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+        .glass-panel {
+            background: rgba(255, 248, 225, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #FFD700;
+            position: sticky;
+            top: 0;
+        }
+        .menu-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            min-height: 100%;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #FFD700;
+            box-shadow: 0 20px 25px -5px rgba(62, 39, 35, 0.15), 0 10px 10px -5px rgba(62, 39, 35, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #E60000 0%, #C40000 100%);
+            transition: all 0.2s ease;
+            border: 2px solid #FFD700;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(230, 0, 0, 0.4);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF8E1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD700;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E60000;
+        }
+    </style>
+</head>
+<body class="font-body text-brand-brown antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-40 glass-panel shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Llavis Dog Logo" class="h-12 md:h-16 w-auto object-contain drop-shadow-md animate-float">
+            </div>
+            <button onclick="toggleCart()" class="relative bg-brand-brown text-white px-4 py-2 rounded-full font-medium hover:bg-brand-red transition-colors flex items-center gap-2 border border-brand-gold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="hidden sm:inline">Carrinho</span>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-brand-gold text-brand-brown text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-0 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-brand-gold">
+                <img src="images/banner.png" alt="Hot Dog Gourmet Llavis Dog" class="w-full h-64 md:h-96 object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-brown/80 via-brand-brown/40 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-center">
+                    <h2 class="font-display text-2xl md:text-6xl text-white mb-4 drop-shadow-lg">
+                        O Sabor que <span class="text-brand-gold">Conquista</span>
+                    </h2>
+                    <p class="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-6">
+                        Hot dogs artesanais com ingredientes frescos e aquele molho especial da casa.
+                    </p>
+                    <a href="#menu" class="btn-primary text-white px-8 py-4 rounded-full font-display text-lg inline-flex items-center gap-2">
+                        Ver Cardápio
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-16 px-4 bg-white/80 backdrop-blur-sm">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h3 class="font-display text-4xl text-brand-brown mb-2">Nosso Cardápio</h3>
+                <div class="w-24 h-1 bg-brand-red mx-auto rounded-full"></div>
+            </div>
+
+            <!-- Categories -->
+            <div class="flex justify-start md:justify-center gap-2 md:gap-4 mb-10 flex-wrap overflow-x-auto pb-2">
+                <button onclick="filterMenu('all')" class="category-btn active bg-brand-red text-white px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium transition-all border-2 border-brand-gold whitespace-nowrap">Todos</button>
+                <button onclick="filterMenu('hotdog')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Hot Dogs</button>
+                <button onclick="filterMenu('bebida')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Bebidas</button>
+                <button onclick="filterMenu('sobremesa')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Sobremesas</button>
+                <button onclick="filterMenu('tapioca')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Tapioca</button>
+                <button onclick="filterMenu('porcao')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Porções</button>
+                <button onclick="filterMenu('caldo')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Caldos</button>
+                <button onclick="filterMenu('combo')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Combos</button>
+                <button onclick="filterMenu('adicional')" class="category-btn bg-white text-brand-brown px-4 md:px-6 py-2 rounded-full text-sm md:text-base font-medium hover:bg-brand-gold hover:text-brand-brown transition-all border-2 border-brand-brown whitespace-nowrap">Adicionais</button>
+            </div>
+
+            <!-- Menu Grid -->
+            <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Items will be injected here by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Delivery Section -->
+    <section class="py-16 px-4 bg-brand-brown/5">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="rounded-2xl overflow-hidden shadow-xl border-2 border-brand-gold order-2 md:order-1">
+                    <img src="images/entrega.png" alt="Entrega rápida" class="w-full h-80 object-cover">
+                </div>
+                <div class="order-1 md:order-2">
+                    <span class="inline-block bg-brand-red/20 text-brand-red px-4 py-1 rounded-full text-sm font-semibold mb-4 border border-brand-red">🛵 Entrega Rápida</span>
+                    <h3 class="font-display text-4xl text-brand-brown mb-4">Receba no Conforto da Sua Casa</h3>
+                    <p class="text-gray-700 text-lg leading-relaxed mb-6">
+                        Fazemos entregas rápidas e seguras para você aproveitar seu hot dog quentinho onde estiver. Nosso motoboy profissional garante que seu pedido chegue perfeito.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="bg-white p-4 rounded-xl border-2 border-brand-gold flex-1">
+                            <p class="font-display text-2xl text-brand-red mb-1">Rápido</p>
+                            <p class="text-gray-600 text-sm">Entrega em até 40 minutos</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border-2 border-brand-gold flex-1">
+                            <p class="font-display text-2xl text-brand-red mb-1">Seguro</p>
+                            <p class="text-gray-600 text-sm">Embalagem térmica profissional</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-brown text-brand-cream py-12 px-4 mt-16 border-t-4 border-brand-gold relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <img src="images/footer.png" alt="" class="w-full h-full object-cover">
+        </div>
+        <div class="relative z-10">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            <div>
+                <h4 class="font-display text-2xl mb-4 text-brand-gold">Llavis Dog</h4>
+                <p class="text-gray-300">O sabor que conquista em cada mordida.</p>
+            </div>
+            <div>
+                <h4 class="font-display text-xl mb-4 text-brand-gold">Contato</h4>
+                <p class="text-gray-300">📍 Av. Florianópolis, 307 - São João</p>
+                <p class="text-gray-300">📞 (11) 99794-5165</p>
+                <p class="text-gray-300">📱 Instagram: @llavisdog</p>
+            </div>
+            <div>
+                <h4 class="font-display text-xl mb-4 text-brand-gold">Formas de Pagamento</h4>
+                <p class="text-gray-300">💳 Cartão de Crédito/Débito</p>
+                <p class="text-gray-300">💵 Dinheiro</p>
+                <p class="text-gray-300">📱 Pix</p>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-gray-600 text-center text-gray-400 text-sm">
+            &copy; 2026 Llavis Dog. Todos os direitos reservados.
+        </div>
+        </div>
+    </footer>
+
+    <!-- Options Modal -->
+    <div id="options-modal" class="fixed inset-0 bg-black/60 z-[60] hidden items-center justify-center p-4" style="z-index: 9999;">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border-2 border-brand-gold overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-brand-brown text-white p-4 flex justify-between items-center">
+                <h3 id="modal-title" class="font-display text-lg md:text-xl">Escolha uma opção</h3>
+                <button onclick="closeOptionsModal()" class="hover:text-brand-gold transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-options" class="p-4 md:p-6 space-y-3 overflow-y-auto flex-1">
+                <!-- Options injected here -->
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                <button id="modal-confirm-btn" onclick="confirmOptionSelection()" class="w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]" disabled>
+                    Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300" style="z-index: 9998;"></div>
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" style="z-index: 9999;">
+        <div class="p-6 bg-brand-brown text-white flex justify-between items-center border-b-2 border-brand-gold">
+            <h3 class="font-display text-2xl">Seu Pedido</h3>
+            <button onclick="toggleCart()" class="hover:text-brand-gold transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Cart items injected here -->
+            <div class="text-center text-gray-500 mt-10">
+                <p class="text-4xl mb-2">🛒</p>
+                <p>Seu carrinho está vazio</p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t border-gray-200 space-y-4">
+            <!-- Delivery/Pickup Toggle -->
+            <div class="bg-brand-cream p-1 rounded-lg border-2 border-brand-brown flex">
+                <button onclick="setOrderType('delivery')" id="btn-delivery" class="flex-1 py-2 rounded-md font-medium transition-all bg-brand-red text-white border border-brand-gold">Entrega</button>
+                <button onclick="setOrderType('pickup')" id="btn-pickup" class="flex-1 py-2 rounded-md font-medium transition-all text-brand-brown hover:bg-brand-gold">Retirada</button>
+            </div>
+
+            <!-- Dynamic Fields -->
+            <div id="delivery-fields" class="space-y-3">
+                <input type="text" id="customer-name" placeholder="Seu nome" class="w-full px-4 py-2 rounded-lg border-2 border-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-red bg-white">
+                <input type="text" id="customer-address" placeholder="Endereço completo (Rua, nº, Bairro)" class="w-full px-4 py-2 rounded-lg border-2 border-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-red bg-white">
+                <input type="text" id="customer-complement" placeholder="Complemento (Apto, Bloco, Ref.)" class="w-full px-4 py-2 rounded-lg border-2 border-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-red bg-white">
+            </div>
+            
+            <div id="pickup-fields" class="space-y-3 hidden">
+                <input type="text" id="customer-name-pickup" placeholder="Seu nome" class="w-full px-4 py-2 rounded-lg border-2 border-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-red bg-white">
+                <p class="text-sm text-brand-brown bg-brand-gold/30 p-3 rounded-lg border border-brand-gold font-medium">
+                    ⏱️ Tempo médio de preparo: 15-20 minutos.
+                </p>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t-2 border-brand-brown">
+                <span class="text-brand-brown font-bold text-lg">Total:</span>
+                <span id="cart-total" class="font-display text-3xl text-brand-red">R$ 0,00</span>
+            </div>
+
+            <button onclick="checkout()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                Finalizar no WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Menu Data
+        const menuItems = [
+            { id: 1, name: "Dog Kids", description: "Pão, 1 salsicha, batata palha, ketchup, purê, maionese e milho.", price: 13.90, category: "hotdog", image: "images/dog-kids.png" },
+            { id: 2, name: "Dog Tradicional", description: "Pão, 2 salsichas, vinagrete, purê, batata palha, maionese, ketchup e mostarda. Prensado.", price: 16.90, category: "hotdog", image: "images/dog-tradicional.png" },
+            { id: 3, name: "Dog Completo", description: "Pão, 2 salsichas, vinagrete, purê, milho, ervilha, batata palha, maionese, ketchup e mostarda. Prensado.", price: 19.90, category: "hotdog", image: "images/dog-completo.png" },
+            { id: 4, name: "Dog Supremo", description: "Pão, 2 salsichas, bacon, purê, batata palha, milho, cheddar, catupiry, ketchup e mostarda. Com borda cheddar. Prensado.", price: 28.90, category: "hotdog", image: "images/dog-supremo.png" },
+            { id: 5, name: "Dog Doritos", description: "Pão, 2 salsichas, purê, catupiry, cheddar, bacon, doritos triturado, ketchup e mostarda. Prensado.", price: 28.90, category: "hotdog", image: "images/dog-doritos.png" },
+            { id: 6, name: "Dog Junior Prensado (Combo)", description: "1 salsicha, purê, maionese, ketchup, mostarda, vinagrete, batata palha + Fritas + Refrigerante 300ml. Prensado.", price: 20.90, category: "combo", image: "images/dog-junior.png" },
+            { id: 7, name: "Refrigerante Lata (350ml)", description: "Coca-Cola, Coca Zero, Guaraná, Pepsi Black ou Fanta.", price: 7.00, category: "bebida", image: "images/refrigerantes-2l.png", options: ["Coca-Cola", "Coca-Cola Zero", "Guaraná", "Pepsi Black", "Fanta Laranja", "Fanta Uva", "Soda Limonada"] },
+            { id: 8, name: "Água Sem Gás (500ml)", description: "Garrafa de água mineral sem gás.", price: 4.00, category: "bebida", image: "images/agua-sem-gas.png" },
+            { id: 9, name: "Água Com Gás (500ml)", description: "Garrafa de água mineral com gás.", price: 4.50, category: "bebida", image: "images/agua-com-gas.png" },
+            { id: 10, name: "Suco Natural (500ml)", description: "Abacaxi, Laranja, Maracujá ou Morango.", price: 12.00, category: "bebida", image: "images/suco-natural.png" },
+            { id: 11, name: "Milk Shake (300ml)", description: "Chocolate, Morango ou Ovomaltine.", price: 14.90, category: "sobremesa", image: "images/milkshake.png", options: ["Chocolate", "Morango", "Ovomaltine"] },
+            { id: 14, name: "Milk Shake (500ml)", description: "Chocolate, Morango ou Ovomaltine.", price: 19.90, category: "sobremesa", image: "images/milkshake.png", options: ["Chocolate", "Morango", "Ovomaltine"] },
+            { id: 12, name: "Tortinha de Limão", description: "Mini torta de limão com merengue, massa crocante e recheio cremoso.", price: 8.00, category: "sobremesa", image: "images/tortinha-limao.png" },
+            { id: 13, name: "Tortinha de Maracujá", description: "Mini torta de maracujá com cobertura cremosa e massa crocante.", price: 8.00, category: "sobremesa", image: "images/tortinha-maracuja.png" },
+            { id: 15, name: "Tapioca Frango com Catupiry", description: "Tapioca recheada com frango desfiado e catupiry cremoso.", price: 18.90, category: "tapioca", image: "images/tapioca-frango.png" },
+            { id: 16, name: "Tapioca Banana com Avelã", description: "Tapioca doce com banana e pasta de avelã.", price: 18.90, category: "tapioca", image: "images/tapioca-banana.png" },
+            { id: 17, name: "Tapioca Coco com Leite Condensado", description: "Tapioca doce com coco ralado e leite condensado.", price: 18.90, category: "tapioca", image: "images/tapioca-coco.png" },
+            { id: 18, name: "Tapioca Margarina", description: "Tapioca simples com margarina derretida.", price: 10.90, category: "tapioca", image: "images/tapioca-margarina.png" },
+            { id: 19, name: "Tapioca Morango com Avelã", description: "Tapioca doce com morangos frescos e pasta de avelã.", price: 18.90, category: "tapioca", image: "images/tapioca-morango.png" },
+            { id: 20, name: "Batata Frita Tradicional (M)", description: "Porção média de batatas fritas crocantes e douradas.", price: 13.90, category: "porcao", image: "images/batata-frita.png" },
+            { id: 21, name: "Batata Frita Tradicional (G)", description: "Porção grande de batatas fritas crocantes e douradas.", price: 17.90, category: "porcao", image: "images/batata-frita.png" },
+            { id: 22, name: "Batata Frita Completa (M)", description: "Porção média de batata frita com cheddar e bacon crocante.", price: 22.90, category: "porcao", image: "images/batata-frita.png" },
+            { id: 23, name: "Batata Frita Completa (G)", description: "Porção grande de batata frita com cheddar e bacon crocante.", price: 25.90, category: "porcao", image: "images/batata-frita.png" },
+            { id: 24, name: "Anéis de Cebola", description: "Anéis de cebola empanados e fritos, crocantes e dourados.", price: 16.90, category: "porcao", image: "images/aneis-cebola.png", options: ["8 unidades", "12 unidades"] },
+            { id: 25, name: "Refrigerante 600ml", description: "Fanta Laranja, Fanta Uva ou Soda Limonada.", price: 11.90, category: "bebida", image: "images/refri-600ml.png", options: ["Fanta Laranja", "Fanta Uva", "Soda Limonada"] },
+            { id: 26, name: "Refrigerante 1 Litro", description: "Coca-Cola, Coca-Cola Zero, Guaraná ou Pepsi Black.", price: 14.90, category: "bebida", image: "images/refri-1l.png", options: ["Coca-Cola", "Coca-Cola Zero", "Guaraná", "Pepsi Black"] },
+            { id: 27, name: "Refrigerante 2 Litros", description: "Coca-Cola, Coca Zero ou Guaraná.", price: 20.00, category: "bebida", image: "images/refri-2l.png", options: ["Coca-Cola", "Coca Zero", "Guaraná"] },
+            { id: 31, name: "Dolly 2 Litros", description: "Refrigerante Dolly gelado de 2 litros.", price: 12.90, category: "bebida", image: "images/refri-2l.png" },
+            { id: 28, name: "Vitamina de Açaí 500ml", description: "Vitamina cremosa de açaí, energética e refrescante.", price: 20.00, category: "bebida", image: "images/vitamina-500ml.png" },
+            { id: 29, name: "Suco de Caixa 200ml", description: "Suco individual de caixa, prático e refrescante.", price: 3.90, category: "bebida", image: "images/suco-caixa-200ml.png" },
+            { id: 30, name: "Suco de Caixa 1 Litro", description: "Caixa de suco 1 litro, ideal para compartilhar.", price: 10.90, category: "bebida", image: "images/suco-caixa-1l.png" },
+            { id: 32, name: "Caldo Verde 500ml", description: "Tradicional caldo verde com couve, batata e calabresa, servido bem quentinho.", price: 25.90, category: "caldo", image: "images/caldo-verde.png" },
+            { id: 33, name: "Caldo de Mandioquinha com Costela 500ml", description: "Cremoso caldo de mandioquinha com costela desfiada, sabor caseiro e reconfortante.", price: 25.90, category: "caldo", image: "images/caldo-mandioquinha.png" },
+            { id: 34, name: "Salsicha Unidade", description: "Salsicha adicional para seu hot dog.", price: 2.50, category: "adicional", image: "images/salsicha.png" },
+            { id: 35, name: "Borda Catupiry", description: "Borda recheada com catupiry cremoso.", price: 4.00, category: "adicional", image: "images/borda-catupiry.png" },
+            { id: 36, name: "Borda Cheddar", description: "Borda recheada com cheddar derretido.", price: 4.00, category: "adicional", image: "images/borda-cheddar.png" },
+            { id: 37, name: "Maionese Verde", description: "Maionese verde especial da casa.", price: 5.00, category: "adicional", image: "images/maionese-verde.png" },
+            { id: 38, name: "Pote Bacon", description: "Porção extra de bacon crocante.", price: 5.00, category: "adicional", image: "images/pote-bacon.png" },
+            { id: 39, name: "Mussarela Derretida", description: "Porção extra de mussarela derretida.", price: 5.00, category: "adicional", image: "images/mussarela.png" },
+            { id: 40, name: "Pote Catupiry", description: "Porção extra de catupiry cremoso.", price: 6.00, category: "adicional", image: "images/pote-catupiry.png" },
+            { id: 41, name: "Pote Cheddar", description: "Porção extra de cheddar derretido.", price: 6.00, category: "adicional", image: "images/pote-cheddar.png" }
+        ];
+
+        let cart = [];
+        let orderType = 'delivery';
+        let pendingItem = null;
+        let selectedOption = null;
+
+        // Render Menu
+        function renderMenu(filter = 'all') {
+            const grid = document.getElementById('menu-grid');
+            grid.innerHTML = '';
+            
+            const filteredItems = filter === 'all' ? menuItems : menuItems.filter(item => item.category === filter);
+            
+            filteredItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'menu-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col animate-fade-in';
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <div class="mb-4 overflow-hidden rounded-xl">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover transform hover:scale-110 transition-transform duration-300">
+                    </div>
+                    <h4 class="font-display text-xl text-brand-brown mb-2">${item.name}</h4>
+                    <p class="text-gray-600 text-sm mb-4 flex-1 leading-relaxed">${item.description}</p>
+                    <div class="flex justify-between items-center mt-auto pt-4 border-t-2 border-brand-gold/50">
+                        <span class="font-display text-2xl text-brand-red">R$ ${item.price.toFixed(2).replace('.', ',')}</span>
+                        <button onclick="addToCart(${item.id})" class="bg-brand-brown text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-brand-red transition-colors flex items-center gap-2 border border-brand-gold">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Adicionar
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Update category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-red', 'text-white', 'border-brand-gold');
+                btn.classList.add('bg-white', 'text-brand-brown', 'border-brand-brown');
+            });
+            if (event?.target) {
+                event.target.classList.remove('bg-white', 'text-brand-brown', 'border-brand-brown');
+                event.target.classList.add('bg-brand-red', 'text-white', 'border-brand-gold');
+            }
+        }
+
+        function filterMenu(category) {
+            renderMenu(category);
+        }
+
+        // Cart Functions
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            
+            // If item has options, show modal
+            if (item.options && item.options.length > 0) {
+                showOptionsModal(item);
+                return;
+            }
+            
+            const cartId = String(id);
+            const existingItem = cart.find(i => i.cartId === cartId);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...item, cartId: cartId, quantity: 1 });
+            }
+            updateCart();
+            toggleCart(true);
+        }
+
+        // Options Modal Functions
+        function showOptionsModal(item) {
+            pendingItem = item;
+            selectedOption = null;
+            
+            document.getElementById('modal-title').textContent = `Escolha o sabor - ${item.name}`;
+            
+            const optionsContainer = document.getElementById('modal-options');
+            optionsContainer.innerHTML = item.options.map((option, index) => `
+                <label class="flex items-center gap-3 p-3 rounded-lg border-2 border-gray-200 hover:border-brand-gold cursor-pointer transition-all">
+                    <input type="radio" name="item-option" value="${option}" class="w-5 h-5 text-brand-red focus:ring-brand-red" onchange="selectOption('${option}')">
+                    <span class="font-medium text-brand-brown">${option}</span>
+                </label>
+            `).join('');
+            
+            document.getElementById('modal-confirm-btn').disabled = true;
+            
+            const modal = document.getElementById('options-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function selectOption(option) {
+            selectedOption = option;
+            document.getElementById('modal-confirm-btn').disabled = false;
+        }
+
+        function closeOptionsModal() {
+            const modal = document.getElementById('options-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingItem = null;
+            selectedOption = null;
+        }
+
+        function confirmOptionSelection() {
+            if (!pendingItem || !selectedOption) return;
+            
+            const itemId = `${pendingItem.id}-${selectedOption}`;
+            const existingItem = cart.find(i => i.cartId === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ 
+                    ...pendingItem, 
+                    cartId: itemId,
+                    selectedOption: selectedOption,
+                    name: `${pendingItem.name} (${selectedOption})`,
+                    quantity: 1 
+                });
+            }
+            
+            updateCart();
+            closeOptionsModal();
+            toggleCart(true);
+        }
+
+        function removeFromCart(cartId) {
+            cart = cart.filter(i => i.cartId !== cartId);
+            updateCart();
+        }
+
+        function updateQuantity(cartId, change) {
+            const item = cart.find(i => i.cartId === cartId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(cartId);
+                } else {
+                    updateCart();
+                }
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center text-gray-500 mt-10">
+                        <p class="text-4xl mb-2">🛒</p>
+                        <p>Seu carrinho está vazio</p>
+                    </div>
+                `;
+                cartTotal.textContent = 'R$ 0,00';
+                return;
+            }
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center bg-brand-cream p-3 rounded-lg border border-brand-brown">
+                    <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg mr-3">
+                    <div class="flex-1">
+                        <h5 class="font-medium text-brand-brown text-sm">${item.name}</h5>
+                        <p class="text-sm text-gray-600">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="updateQuantity('${item.cartId}', -1)" class="w-6 h-6 rounded-full bg-white hover:bg-gray-200 border border-brand-brown flex items-center justify-center text-brand-brown font-bold">-</button>
+                        <span class="font-medium w-4 text-center text-brand-brown">${item.quantity}</span>
+                        <button onclick="updateQuantity('${item.cartId}', 1)" class="w-6 h-6 rounded-full bg-brand-red hover:bg-red-700 flex items-center justify-center text-white font-bold">+</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function toggleCart(forceOpen = false) {
+            const sidebar = document.getElementById('cart-sidebar');
+            const overlay = document.getElementById('cart-overlay');
+            
+            if (forceOpen || sidebar.classList.contains('translate-x-full')) {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        function setOrderType(type) {
+            orderType = type;
+            const btnDelivery = document.getElementById('btn-delivery');
+            const btnPickup = document.getElementById('btn-pickup');
+            const deliveryFields = document.getElementById('delivery-fields');
+            const pickupFields = document.getElementById('pickup-fields');
+            
+            if (type === 'delivery') {
+                btnDelivery.classList.add('bg-brand-red', 'text-white', 'border-brand-gold');
+                btnDelivery.classList.remove('text-brand-brown', 'hover:bg-brand-gold', 'bg-white');
+                btnPickup.classList.remove('bg-brand-red', 'text-white', 'border-brand-gold');
+                btnPickup.classList.add('text-brand-brown', 'hover:bg-brand-gold', 'bg-white');
+                deliveryFields.classList.remove('hidden');
+                pickupFields.classList.add('hidden');
+            } else {
+                btnPickup.classList.add('bg-brand-red', 'text-white', 'border-brand-gold');
+                btnPickup.classList.remove('text-brand-brown', 'hover:bg-brand-gold', 'bg-white');
+                btnDelivery.classList.remove('bg-brand-red', 'text-white', 'border-brand-gold');
+                btnDelivery.classList.add('text-brand-brown', 'hover:bg-brand-gold', 'bg-white');
+                pickupFields.classList.remove('hidden');
+                deliveryFields.classList.add('hidden');
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+
+            let name = orderType === 'delivery' ? document.getElementById('customer-name').value : document.getElementById('customer-name-pickup').value;
+            let address = document.getElementById('customer-address').value;
+            let complement = document.getElementById('customer-complement').value;
+
+            if (!name) {
+                alert('Por favor, informe seu nome.');
+                return;
+            }
+
+            if (orderType === 'delivery' && !address) {
+                alert('Por favor, informe o endereço de entrega.');
+                return;
+            }
+
+            let message = `*NOVO PEDIDO - LLAVIS DOG* 🌭🔥\n*O sabor que conquista!*\n\n`;
+            message += `*Cliente:* ${name}\n`;
+            message += `*Tipo:* ${orderType === 'delivery' ? 'Entrega 🛵' : 'Retirada na Loja 🏪'}\n`;
+            
+            if (orderType === 'delivery') {
+                message += `*Endereço:* ${address}${complement ? ` (${complement})` : ''}\n`;
+            }
+            
+            message += `\n*ITENS DO PEDIDO:*\n`;
+            cart.forEach(item => {
+                message += `• ${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            message += `\n*TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n`;
+            message += `\nForma de pagamento: A combinar no WhatsApp.`;
+
+            // Replace with your actual WhatsApp number (e.g., 5511999999999)
+            const phoneNumber = "5511997945165"; 
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+        }
+
+        // Initialize
+        renderMenu();
+    </script>
+</body>
+</html>
